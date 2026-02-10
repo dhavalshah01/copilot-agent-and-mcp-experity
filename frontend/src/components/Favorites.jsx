@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchFavorites } from '../store/favoritesSlice';
+import { fetchFavorites, removeFavorite } from '../store/favoritesSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Favorites = () => {
@@ -17,6 +17,16 @@ const Favorites = () => {
     }
     dispatch(fetchFavorites(token));
   }, [dispatch, token, navigate]);
+
+  // generated-by-copilot: Handle remove from favorites
+  const handleRemove = async (bookId) => {
+    try {
+      await dispatch(removeFavorite({ token, bookId })).unwrap();
+      dispatch(fetchFavorites(token));
+    } catch (error) {
+      console.error('Failed to remove from favorites:', error);
+    }
+  };
 
   if (status === 'loading') return <div>Loading...</div>;
   if (status === 'failed') return <div>Failed to load favorites.</div>;
@@ -45,6 +55,12 @@ const Favorites = () => {
           {favorites.map(book => (
             <li key={book.id}>
               <strong>{book.title}</strong> by {book.author}
+              <button 
+                onClick={() => handleRemove(book.id)}
+                style={{ marginLeft: '10px' }}
+              >
+                Remove
+              </button>
             </li>
           ))}
         </ul>
