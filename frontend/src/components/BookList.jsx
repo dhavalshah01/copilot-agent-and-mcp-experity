@@ -28,12 +28,16 @@ const BookList = () => {
       navigate('/');
       return;
     }
-    if (isFavorite) {
-      await dispatch(removeFavorite({ token, bookId }));
-    } else {
-      await dispatch(addFavorite({ token, bookId }));
+    try {
+      if (isFavorite) {
+        await dispatch(removeFavorite({ token, bookId })).unwrap();
+      } else {
+        await dispatch(addFavorite({ token, bookId })).unwrap();
+      }
+      dispatch(fetchFavorites(token));
+    } catch (error) {
+      console.error('Failed to update favorites:', error);
     }
-    dispatch(fetchFavorites(token));
   };
 
   if (status === 'loading') return <div>Loading...</div>;

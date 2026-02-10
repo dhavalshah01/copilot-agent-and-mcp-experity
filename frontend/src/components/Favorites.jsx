@@ -20,8 +20,12 @@ const Favorites = () => {
 
   // generated-by-copilot: Handle remove from favorites
   const handleRemove = async (bookId) => {
-    await dispatch(removeFavorite({ token, bookId }));
-    dispatch(fetchFavorites(token));
+    try {
+      await dispatch(removeFavorite({ token, bookId })).unwrap();
+      dispatch(fetchFavorites(token));
+    } catch (error) {
+      console.error('Failed to remove from favorites:', error);
+    }
   };
 
   if (status === 'loading') return <div>Loading...</div>;
