@@ -1,8 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchBooks } from '../store/booksSlice';
-import { addFavorite, fetchFavorites } from '../store/favoritesSlice';
+import { addFavorite, removeFavorite, fetchFavorites } from '../store/favoritesSlice';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/BookList.module.css';
 
@@ -23,12 +22,17 @@ const BookList = () => {
     dispatch(fetchFavorites(token));
   }, [dispatch, token, navigate]);
 
-  const handleAddFavorite = async (bookId) => {
+  // generated-by-copilot: Handle toggle favorite (add or remove)
+  const handleToggleFavorite = async (bookId, isFavorite) => {
     if (!token) {
       navigate('/');
       return;
     }
-    await dispatch(addFavorite({ token, bookId }));
+    if (isFavorite) {
+      await dispatch(removeFavorite({ token, bookId }));
+    } else {
+      await dispatch(addFavorite({ token, bookId }));
+    }
     dispatch(fetchFavorites(token));
   };
 
@@ -69,9 +73,9 @@ const BookList = () => {
                 <div className={styles.bookAuthor}>by {book.author}</div>
                 <button
                   className={styles.simpleBtn}
-                  onClick={() => handleAddFavorite(book.id)}
+                  onClick={() => handleToggleFavorite(book.id, isFavorite)}
                 >
-                  {isFavorite ? 'In Favorites' : 'Add to Favorites'}
+                  {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                 </button>
               </div>
             );
