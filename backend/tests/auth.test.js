@@ -80,7 +80,7 @@ describe('Auth API Rate Limiting', () => {
     // 6th attempt should be rate limited
     const res = await request(appWithRateLimit).post('/api/login').send(testCreds);
     expect(res.statusCode).toBe(429);
-    expect(res.text).toContain('Too many');
+    expect(res.text).toBe('Too many authentication attempts, please try again later.');
   });
 
   it('should rate limit register attempts after exceeding the limit', async () => {
@@ -112,5 +112,6 @@ describe('Auth API Rate Limiting', () => {
       password: 'testpass' 
     });
     expect(res.statusCode).toBe(429);
+    expect(res.text).toBe('Too many authentication attempts, please try again later.');
   });
 });
