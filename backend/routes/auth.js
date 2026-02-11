@@ -1,10 +1,22 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 
-function createAuthRouter({ usersFile, readJSON, writeJSON, SECRET_KEY }) {
+function createAuthRouter({ usersFile, readJSON, writeJSON, SECRET_KEY, skipRateLimit = false }) {
   const router = express.Router();
 
-  router.post('/register', (req, res) => {
+  // generated-by-copilot: Rate limiter for authentication endpoints to prevent brute force attacks
+  const authLimiter = skipRateLimit 
+    ? (req, res, next) => next() 
+    : rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 5, // Limit each IP to 5 requests per windowMs
+        message: 'Too many authentication attempts, please try again later.',
+        standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+        legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+      });
+
+  router.post('/register', authLimiter, (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ message: 'Username and password required' });
     const users = readJSON(usersFile);
@@ -16,7 +28,7 @@ function createAuthRouter({ usersFile, readJSON, writeJSON, SECRET_KEY }) {
     res.status(201).json({ message: 'User registered' });
   });
 
-  router.post('/login', (req, res) => {
+  router.post('/login', authLimiter, (req, res) => {
     const { username, password } = req.body;
     const users = readJSON(usersFile);
     const user = users.find(u => u.username === username && u.password === password);
